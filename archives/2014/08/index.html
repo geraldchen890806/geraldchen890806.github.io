@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2014/8 | Hexo</title>
+  <title>Archives: 2014/8 | Gerald Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
+<meta property="og:title" content="Gerald Blog">
 <meta property="og:url" content="http://yoursite.com/archives/2014/08/">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="Gerald Blog">
 <meta property="og:description">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="Gerald Blog">
 <meta name="twitter:description">
 
   
-    <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
+    <link rel="alternative" href="/atom.xml" title="Gerald Blog" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -34,7 +34,7 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/" id="logo">Hexo</a>
+        <a href="/" id="logo">Gerald Blog</a>
       </h1>
       
     </div>
@@ -116,6 +116,70 @@
 
 
   
+    <article id="post-js_repeat" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/08/18/js_repeat/" class="article-date">
+  <time datetime="2014-08-18T07:21:35.000Z" itemprop="datePublished">Aug 18 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/08/18/js_repeat/">js repeat</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="在JavaScript框架设计(司徒正美)一书中看到repeate这个方法的演变历史，在此分享下">在JavaScript框架设计(司徒正美)一书中看到repeate这个方法的演变历史，在此分享下</h4>
+<h5 id="repeat方法：将一个字符串重复自身N次，如repeat(“ruby”,_2)_得到rubyruby">repeat方法：将一个字符串重复自身N次，如repeat(“ruby”, 2) 得到rubyruby</h5>
+<p>版本1: 利用空数组join方法</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">repeat</span><span class="params">(target, n)</span> </span>{</div><div class="line">    <span class="keyword">return</span> (<span class="keyword">new</span> <span class="built_in">Array</span>(n + <span class="number">1</span>)).join(target);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>版本2：版本1的改良版，创建一个对象，拥有length属性，然后利用call方法去调用数组原型的join方法，省去创建数组这一步，性能大为提高。重复次数越多，两者对比越明显。另，之所以要创建一个带length属性的对象，是因为要调用数组的原型方法，需要指定call的第一个参数为数组对象。而类数组对象的必要条件是其length属性的值为非负整数。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">repeat</span><span class="params">(target, n)</span> </span>{</div><div class="line">    <span class="keyword">return</span> <span class="built_in">Array</span>.prototype.join.call({</div><div class="line">        length: n+<span class="number">1</span></div><div class="line">    }, target);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>版本3: 版本2的改良版，利用闭包将类数组对象与数组原型的join方法缓存起来，省得每次都重复创建与寻找方法。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">repeat</span><span class="params">(target, n)</span> </span>{</div><div class="line">    <span class="keyword">var</span> join = <span class="built_in">Array</span>.prototype.join, obj = {};</div><div class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span><span class="params">(target, n)</span> </span>{</div><div class="line">        obj.length = n + <span class="number">1</span>;</div><div class="line">        <span class="keyword">return</span> join.call(obj, target);</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>版本4：从算法上着手，使用二分法，比如我们将ruby重复5次，其实我们在第二次已得rubyruby，那么3次直接用rubyruby进行操作，而不是ruby。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">repeat</span><span class="params">(target, n)</span> </span>{</div><div class="line">    <span class="keyword">var</span> s = target, total = [];</div><div class="line">    <span class="keyword">while</span> (n &gt; <span class="number">0</span>) {</div><div class="line">        <span class="keyword">if</span> (n % <span class="number">2</span> == <span class="number">1</span>)</div><div class="line">            total[totl.length] = s;</div><div class="line">        <span class="keyword">if</span> (n == <span class="number">1</span>)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        s += s;</div><div class="line">        n = n &gt;&gt; <span class="number">1</span>;<span class="comment">//相当于将n除以2取商，或者说开2二次方</span></div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> total.join(<span class="string">""</span>);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>版本5: 版本4的变种，免去创建数组与使用jion方法。他的悲剧之处在于它在循环中穿件的字符串比要求的还长，需要回减一下。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">repeat</span><span class="params">(target, n)</span> </span>{</div><div class="line">    <span class="keyword">var</span> s = target, c = s.length * n;</div><div class="line">    <span class="keyword">do</span> {</div><div class="line">        s += s;</div><div class="line">    } <span class="keyword">while</span> (n = n &gt;&gt; <span class="number">1</span>);</div><div class="line">    s = s.substring(<span class="number">0</span>, c);</div><div class="line">    <span class="keyword">return</span> s;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>版本6: 版本4的改良版。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">repeat</span><span class="params">(target, n)</span> </span>{</div><div class="line">    <span class="keyword">var</span> s = target, total = <span class="string">""</span>;</div><div class="line">    <span class="keyword">while</span> (n &gt; <span class="number">0</span>) {</div><div class="line">        <span class="keyword">if</span> (n % <span class="number">2</span> == <span class="number">1</span>)</div><div class="line">            total += s;</div><div class="line">        <span class="keyword">if</span> (n == <span class="number">1</span>)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        s += s;</div><div class="line">        n = n &gt;&gt; <span class="number">1</span>;</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> total;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>版本7：与版本6相近，不过递归在浏览器下好像都做了优化(包括IE6)，与其他版本相比，属于上乘方案之一。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">repeat</span><span class="params">(target, n)</span> </span>{</div><div class="line">    <span class="keyword">if</span> (n == <span class="number">1</span>)</div><div class="line">        <span class="keyword">return</span> target;</div><div class="line">    <span class="keyword">var</span> s = repeat(target, <span class="built_in">Math</span>.floor(n / <span class="number">2</span>));</div><div class="line">    s += s;</div><div class="line">    <span class="keyword">if</span> (n % <span class="number">2</span>) {</div><div class="line">        s += target;</div><div class="line">    }</div><div class="line">    <span class="keyword">return</span> s;</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>版本8：可以说是一个反例，很慢，不过实际上它还是可行的，因为实际上没有人将n设成成百上千。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">repeat</span><span class="params">(target, n)</span></span> {</div><div class="line">    <span class="keyword">return</span> (n &lt;= <span class="number">0</span>) ? <span class="string">""</span> : target.concat(<span class="keyword">repeat</span>(target, <span class="comment">--n));</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2014/08/18/js_repeat/" data-id="d1eqz4592eh4hg0z" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/js/">js</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
   
 </section>
         
@@ -124,14 +188,28 @@
     
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/js/">js</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/js/" style="font-size: NaNpx;">js</a>
+    </div>
+  </div>
+
   
     
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/08">August 2014</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/08">August 2014</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -146,6 +224,10 @@
             <a href="/2014/08/18/hello-world/">Hello World</a>
           </li>
         
+          <li>
+            <a href="/2014/08/18/js_repeat/">js repeat</a>
+          </li>
+        
       </ul>
     </div>
   </div>
@@ -158,7 +240,7 @@
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2014 John Doe<br>
+      &copy; 2014 gerald chen<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
